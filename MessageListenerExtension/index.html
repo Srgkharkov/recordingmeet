@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Send Message to Extension</title>
+</head>
+<body>
+    <button id="sendMessageButton">Send Message to Extension</button>
+
+    <script>
+        document.getElementById('sendMessageButton').addEventListener('click', () => {
+            const extensionId = 'njipjaigpcnnamffjknniboapafkajnk'; // Укажите ваш ID расширения
+            chrome.runtime.sendMessage(extensionId, { greeting: "hello" }, (response) => {
+                if (response) {
+                    console.log('Response from extension:', response.farewell);
+                    alert('Response from extension: ' + response.farewell);
+                } else {
+                    console.error('No response from extension');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Message Listener Extension",
+  "version": "1.0",
+  "description": "An extension that listens for messages and responds.",
+    "permissions": [
+        "activeTab",
+        "tabCapture",
+        "storage"
+    ],
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}
+//document.querySelector('button[id="button34232432432"]').click();
