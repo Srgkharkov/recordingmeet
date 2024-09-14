@@ -10,6 +10,9 @@
             "request": "launch",
             "mode": "auto",
             "program": "${fileDirname}"
+            "env": {
+                "JWT_SECRET_KEY": "my_super_secret_key"
+            }
         }
     ]
 }

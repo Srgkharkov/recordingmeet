@@ -21,6 +21,8 @@ import (
 	"github.com/chromedp/chromedp"
 
 	cu "github.com/Davincible/chromedp-undetected"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type MeetService struct {
@@ -96,9 +98,72 @@ func ParseLinkAndCreateDir(link string) (*MeetService, error) {
 	return nil, fmt.Errorf("неизвестный сервис")
 }
 
+// Получаем секретный ключ из переменных окружения
+var jwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
+
+// Claims структура для создания и проверки JWT токенов
+type Claims struct {
+	Username string `json:"username"`
+	jwt.RegisteredClaims
+}
+
+// JWTMiddleware проверяет наличие и валидность токена
+func JWTMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Получаем токен из заголовка Authorization
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			http.Error(w, "Authorization header missing", http.StatusUnauthorized)
+			return
+		}
+
+		// Проверяем, что заголовок начинается с "Bearer "
+		if !strings.HasPrefix(authHeader, "Bearer ") {
+			http.Error(w, "Invalid Authorization header format", http.StatusUnauthorized)
+			return
+		}
+
+		// Извлекаем сам токен (после "Bearer ")
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+		// Инициализируем структуру для claims
+		claims := &Claims{}
+
+		// Разбираем и валидируем токен
+		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+			return jwtKey, nil
+		})
+
+		// cl := token.Claims
+
+		// fmt.Printf("cl: %v\n", cl)
+
+		if err != nil {
+			if err == jwt.ErrSignatureInvalid {
+				http.Error(w, "Invalid token signature", http.StatusUnauthorized)
+				return
+			}
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		if !token.Valid {
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		// Передаем обработку дальше если токен валиден
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
-	http.HandleFunc("/record", handleRecordRequest)
-	http.HandleFunc("/download", handleDownloadRequest)
+	if len(jwtKey) == 0 {
+		log.Fatal("JWT_SECRET_KEY is not set")
+	}
+
+	http.Handle("/record", JWTMiddleware(http.HandlerFunc(handleRecordRequest)))
+	http.Handle("/download", JWTMiddleware(http.HandlerFunc(handleDownloadRequest)))
 
 	fmt.Println("Starting server on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
