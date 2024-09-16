@@ -1,22 +1,29 @@
 # Используем официальный образ golang для сборки
-FROM golang:1.20 AS builder
+FROM golang:1.23 AS builder
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
 # Копируем go.mod и go.sum для установки зависимостей
-COPY app/go.mod app/go.sum ./
+COPY go.mod go.sum ./
 RUN go mod download
 
 # Копируем исходный код приложения
-COPY app/ .
+COPY . .
 
 # Сборка Go-приложения
 RUN go build -o build/main .
 
 # Создаем минимальный образ для запуска
 FROM alpine:latest
-RUN apk --no-cache add ca-certificates
+# RUN apk --no-cache add ca-certificates
+# Устанавливаем зависимости и Xvfb
+RUN apk update && apk add --no-cache \
+    xvfb-run \
+    chromium \
+    chromium-chromedriver \
+    go \
+    bash
 
 # Копируем скомпилированное приложение из предыдущего этапа
 COPY --from=builder /app/build/main /main

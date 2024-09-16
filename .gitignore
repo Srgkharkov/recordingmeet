@@ -6,7 +6,7 @@
 *.log
 
 # Ignore build artifacts
-build/
+app/build/
 
 # Ignore IDE specific files
 .idea/
