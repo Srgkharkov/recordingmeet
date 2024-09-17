@@ -134,10 +134,6 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			return jwtKey, nil
 		})
 
-		// cl := token.Claims
-
-		// fmt.Printf("cl: %v\n", cl)
-
 		if err != nil {
 			if err == jwt.ErrSignatureInvalid {
 				http.Error(w, "Invalid token signature", http.StatusUnauthorized)
@@ -440,6 +436,8 @@ func GetRecordsDir() (string, error) {
 }
 
 func handleRecordRequest(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Запорс на подключение принят\n")
+
 	w.Header().Set("Content-Type", "text/plain")
 	w.Header().Set("Transfer-Encoding", "chunked")
 	w.Header().Set("Cache-Control", "no-cache")
@@ -605,6 +603,8 @@ func addFileToZip(zipWriter *zip.Writer, filePath string) error {
 // }
 
 func recGM(ch chan string, ms *MeetService) {
+	log.Printf("Подключение ко встерче Google Meet: %s\n", ms.link)
+	log.Printf("Archive ID:%s\n", ms.dirName)
 	ch <- fmt.Sprintf("Archive ID:%s", ms.dirName)
 	// func recGM(w *http.ResponseWriter, ms *MeetService) (int, error) {
 	// New creates a new context for use with chromedp. With this context

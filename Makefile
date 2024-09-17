@@ -23,5 +23,6 @@ runmaingo:
 
 # Первичное получение сертификатов
  onlycertbot:
-	docker-compose run --rm certbot certonly --webroot -w /var/www/certbot -d rec.srgkharkov.ru
+ 	docker run -it --rm  -v /root/recordingmeet/nginx/certs:/etc/letsencrypt  -v /root/recordingmeet/nginx:/var/lib/letsencrypt  -p 80:80  certbot/certbot certonly --standalone -d rec.srgkharkov.ru
+	# docker-compose run --rm certbot certonly --webroot -w /var/www/certbot -d rec.srgkharkov.ru
 
