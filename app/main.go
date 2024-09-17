@@ -2,7 +2,6 @@ package main
 
 import (
 	"archive/zip"
-	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -17,7 +16,6 @@ import (
 	"time"
 
 	"github.com/chromedp/cdproto/browser"
-	"github.com/chromedp/cdproto/domsnapshot"
 	"github.com/chromedp/chromedp"
 
 	cu "github.com/Davincible/chromedp-undetected"
@@ -611,10 +609,10 @@ func recGM(ch chan string, ms *MeetService) {
 	// you can use chromedp as you normally would.
 	ctx, cancel, err := cu.New(cu.NewConfig(
 		// Remove this if you want to see a browser window.
-		// cu.WithHeadless(), //Требуется xvfb
+		cu.WithHeadless(), //Требуется xvfb
 
 		// If the webelement is not found within 10 minuties, timeout.
-		cu.WithTimeout(5 * time.Minute),
+		cu.WithTimeout(5*time.Minute),
 	))
 	if err != nil {
 		panic(err)
@@ -625,13 +623,13 @@ func recGM(ch chan string, ms *MeetService) {
 	buttonSelectorWOCamMic := `button[jsname="IbE0S"]`
 
 	// Селектор поля ввода имени
-	inputSelector := `input[aria-label="Укажите свое имя"], input#c15, input#c16, input#c17`
+	inputSelector := `input[aria-label="Your name"], input[aria-label="Укажите свое имя"], input#c15, input#c16, input#c17`
 
 	// Селектор кнопки Join
 	buttonSelectorJoin := `button[jsname="Qx7uuf"]`
 
 	// Селектор кнопки Завершения звонка
-	buttonSelectorEnd := `button[aria-label="Покинуть видеовстречу"]`
+	buttonSelectorEnd := `button[aria-label="Покинуть видеовстречу"], button[aria-label="Leave call"]`
 
 	// Селектор для элемента с количеством участников
 	participantCountSelector := "div.uGOf1d"
@@ -663,11 +661,11 @@ func recGM(ch chan string, ms *MeetService) {
 			ch,
 			"Waiting for buttonSelectorWOCamMic visibility",
 			10*time.Second,
-			chromedp.WaitVisible(buttonSelectorWOCamMic),
+			chromedp.WaitVisible(fmt.Sprintf("%s, %s", buttonSelectorWOCamMic, inputSelector)),
 		), // Ожидание видимости кнопки
 
 		chromedp.Sleep(100*time.Millisecond),
-		chromedp.Click(buttonSelectorWOCamMic), // Клик по кнопке
+		// chromedp.Click(buttonSelectorWOCamMic), // Клик по кнопке
 
 		runWithTimeout(
 			ch,
@@ -771,9 +769,10 @@ func runWithTimeout(ch chan string, message string, timeout time.Duration, actio
 				log.Printf("Saved screenshot:%s\n", filename)
 			}
 
-			var htmlSnapshot []string
-			domsnapshot.CaptureSnapshot(htmlSnapshot)
-			err = savePage(htmlSnapshot, fmt.Sprintf("../log/screenshots/%s.html", filename))
+			var htmlContent string
+			chromedp.OuterHTML("html", &htmlContent).Do(ctx)
+			// domsnapshot.CaptureSnapshot(htmlSnapshot)
+			err = savePage(&htmlContent, fmt.Sprintf("../log/screenshots/%s.html", filename))
 		} else {
 			log.Printf("Successfully finished action: %s\n", message)
 		}
@@ -823,30 +822,37 @@ func saveScreenshoot(bytes *[]byte, path string) error {
 
 }
 
-func savePage(data []string, path string) error {
-	// Создаем файл для записи
-	file, err := os.Create(path)
+func savePage(data *string, path string) error {
+	// Сохраняем HTML в файл
+	err := os.WriteFile(path, []byte(*data), os.ModePerm)
 	if err != nil {
-		log.Fatalf("Не удалось создать файл: %v", err)
-	}
-	defer file.Close()
-
-	// Создаем writer для буферизованной записи
-	writer := bufio.NewWriter(file)
-
-	// Записываем строки в файл
-	for _, line := range data {
-		_, err := writer.WriteString(line + "\n")
-		if err != nil {
-			log.Fatalf("Ошибка при записи строки: %v", err)
-		}
+		log.Printf("Ошибка при записи html файла:%v\n", err)
+		return err
 	}
 
-	// Не забудьте сбросить данные из буфера в файл
-	err = writer.Flush()
-	if err != nil {
-		log.Fatalf("Ошибка при завершении записи в файл: %v", err)
-	}
+	// // Создаем файл для записи
+	// file, err := os.Create(path)
+	// if err != nil {
+	// 	log.Fatalf("Не удалось создать файл: %v", err)
+	// }
+	// defer file.Close()
+
+	// // Создаем writer для буферизованной записи
+	// writer := bufio.NewWriter(file)
+
+	// // Записываем строки в файл
+	// for _, line := range data {
+	// 	_, err := writer.WriteString(line + "\n")
+	// 	if err != nil {
+	// 		log.Fatalf("Ошибка при записи строки: %v", err)
+	// 	}
+	// }
+
+	// // Не забудьте сбросить данные из буфера в файл
+	// err = writer.Flush()
+	// if err != nil {
+	// 	log.Fatalf("Ошибка при завершении записи в файл: %v", err)
+	// }
 
 	log.Println("Запись в файл успешно завершена")
 	return nil
