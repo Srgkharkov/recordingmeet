@@ -611,10 +611,10 @@ func recGM(ch chan string, ms *MeetService) {
 	// you can use chromedp as you normally would.
 	ctx, cancel, err := cu.New(cu.NewConfig(
 		// Remove this if you want to see a browser window.
-		cu.WithHeadless(), //Требуется xvfb
+		// cu.WithHeadless(), //Требуется xvfb
 
 		// If the webelement is not found within 10 minuties, timeout.
-		cu.WithTimeout(5*time.Minute),
+		cu.WithTimeout(5 * time.Minute),
 	))
 	if err != nil {
 		panic(err)
