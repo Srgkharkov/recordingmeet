@@ -1,4 +1,4 @@
-package main
+package utils
 
 var mediarecorderjs string = `
 // Объект для хранения активных треков и их записей

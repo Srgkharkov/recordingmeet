@@ -18,8 +18,14 @@ WORKDIR /app
 COPY . .
 RUN go mod download
 
+# Собираем приложение
+RUN go build -o build/rec ./cmd/server
+
+WORKDIR /
+
+
 # Сборка Go-приложения
 # RUN go build -o build/main .
 # CGO_ENABLED=0 GOOS=linux
 
-ENTRYPOINT [ "go", "run", "." ]
+ENTRYPOINT [ "/app/build/rec" ]
