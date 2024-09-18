@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Srgkharkov/recordingmeet/internal/meet"
-	"github.com/Srgkharkov/recordingmeet/internal/utils"
+	// "github.com/Srgkharkov/recordingmeet/internal/utils"
 )
 
 func HandleRecordRequest(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +36,7 @@ func HandleRecordRequest(w http.ResponseWriter, r *http.Request) {
 	switch ms.ShortName {
 	case "GM":
 		ch := make(chan string)
-		go utils.RecordGoogleMeet(ch, ms)
+		go meet.RecordGoogleMeet(ch, ms)
 		for msg := range ch {
 			fmt.Fprintf(w, "%s\n", msg)
 			flusher.Flush()

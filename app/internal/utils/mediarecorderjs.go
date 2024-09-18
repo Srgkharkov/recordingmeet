@@ -1,6 +1,6 @@
 package utils
 
-var mediarecorderjs string = `
+var Mediarecorderjs string = `
 // Объект для хранения активных треков и их записей
 const activeMediaRecorders = {};
 

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-func saveScreenshoot(bytes *[]byte, path string) error {
+func SaveScreenshoot(bytes *[]byte, path string) error {
 	err := os.WriteFile(path, *bytes, 0644)
 	if err != nil {
 		return err
@@ -17,7 +17,7 @@ func saveScreenshoot(bytes *[]byte, path string) error {
 
 }
 
-func savePage(data *string, path string) error {
+func SavePage(data *string, path string) error {
 	// Сохраняем HTML в файл
 	err := os.WriteFile(path, []byte(*data), os.ModePerm)
 	if err != nil {

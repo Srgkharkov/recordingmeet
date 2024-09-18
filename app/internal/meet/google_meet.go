@@ -1,4 +1,4 @@
-package utils
+package meet
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Srgkharkov/recordingmeet/internal/meet"
+	"github.com/Srgkharkov/recordingmeet/internal/utils"
 
 	cu "github.com/Davincible/chromedp-undetected"
 	"github.com/chromedp/cdproto/browser"
@@ -16,7 +16,7 @@ import (
 )
 
 // RecordGoogleMeet starts the recording process for Google Meet.
-func RecordGoogleMeet(ch chan string, ms *meet.MeetService) {
+func RecordGoogleMeet(ch chan string, ms *MeetService) {
 	log.Printf("Archive ID:%s\nConnecting Google Meet: %s\n", ms.ID, ms.Link)
 	ch <- fmt.Sprintf("Archive ID:%s", ms.ID)
 	// New creates a new context for use with chromedp. With this context
@@ -108,7 +108,7 @@ func RecordGoogleMeet(ch chan string, ms *meet.MeetService) {
 			ch <- fmt.Sprintf("Connection to the meeting was completed successfully.")
 			close(ch)
 			// Ваш JavaScript код для запуска на странице
-			return chromedp.Evaluate(mediarecorderjs, nil).Do(ctx)
+			return chromedp.Evaluate(utils.Mediarecorderjs, nil).Do(ctx)
 		}),
 		chromedp.Sleep(10*time.Second),
 		chromedp.ActionFunc(func(ctx context.Context) error {
@@ -170,7 +170,7 @@ func runWithTimeout(ch chan string, message string, timeout time.Duration, actio
 			var screenshotBuffer []byte
 			chromedp.CaptureScreenshot(&screenshotBuffer).Do(ctx)
 			filename := fmt.Sprintf("%d", time.Now().Unix())
-			err := saveScreenshoot(&screenshotBuffer, fmt.Sprintf("./log/screenshots/%s.png", filename))
+			err := utils.SaveScreenshoot(&screenshotBuffer, fmt.Sprintf("./log/screenshots/%s.png", filename))
 			if err != nil {
 				log.Printf("Can`t save screenshot\n")
 			} else {
@@ -180,7 +180,7 @@ func runWithTimeout(ch chan string, message string, timeout time.Duration, actio
 			var htmlContent string
 			chromedp.OuterHTML("html", &htmlContent).Do(ctx)
 			// domsnapshot.CaptureSnapshot(htmlSnapshot)
-			err = savePage(&htmlContent, fmt.Sprintf("./log/screenshots/%s.html", filename))
+			err = utils.SavePage(&htmlContent, fmt.Sprintf("./log/screenshots/%s.html", filename))
 		} else {
 			log.Printf("Successfully finished action: %s\n", message)
 		}
