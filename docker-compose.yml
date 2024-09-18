@@ -6,8 +6,8 @@ services:
       context: ./app
     networks:
       - mynetwork
-    environment:
-      - JWT_SECRET_KEY=my_super_secret_key
+    env-file:
+      - ".env"
     expose:
       - "8080"
 
