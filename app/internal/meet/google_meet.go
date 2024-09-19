@@ -25,8 +25,8 @@ func RecordGoogleMeet(ch chan string, ms *MeetService) {
 		// Remove this if you want to see a browser window.
 		cu.WithHeadless(), //Required xvfb
 
-		// If the webelement is not found within 10 minuties, timeout.
-		cu.WithTimeout(5*time.Minute),
+		// If the webelement is not found within 121 minuties, timeout.
+		cu.WithTimeout(121*time.Minute),
 	))
 	if err != nil {
 		panic(err)

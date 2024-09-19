@@ -6,7 +6,7 @@ services:
       context: ./app
     networks:
       - mynetwork
-    env-file:
+    env_file:
       - ".env"
     expose:
       - "8080"

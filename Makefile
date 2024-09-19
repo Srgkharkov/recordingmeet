@@ -22,5 +22,5 @@ runmaingo:
 	cd app &&	go run main.go
 
 # Первичное получение сертификатов
- onlycertbot:
- 	docker run -it --rm  -v /root/recordingmeet/nginx/certs:/etc/letsencrypt  -v /root/recordingmeet/nginx:/var/lib/letsencrypt  -p 80:80  certbot/certbot certonly --standalone -d example.com
+onlycertbot:
+	docker run -it --rm  -v /root/recordingmeet/nginx/certs:/etc/letsencrypt  -v /root/recordingmeet/nginx:/var/lib/letsencrypt  -p 80:80  certbot/certbot certonly --standalone -d example.com
