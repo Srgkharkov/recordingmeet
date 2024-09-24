@@ -37,11 +37,11 @@ func GetRecordsDir() (string, error) {
 		return "", err
 	}
 
-	// Переходим на один уровень выше
-	parentDir := filepath.Dir(currentDir)
+	// // Переходим на один уровень выше
+	// parentDir := filepath.Dir(currentDir)
 
 	// Создаём путь для директории "records"
-	recordsDir := filepath.Join(parentDir, "records")
+	recordsDir := filepath.Join(currentDir, "records")
 
 	// Проверяем, существует ли директория
 	if info, err := os.Stat(recordsDir); err == nil {

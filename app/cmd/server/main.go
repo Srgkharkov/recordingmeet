@@ -18,6 +18,7 @@ func main() {
 
 	http.Handle("/record", auth.JWTMiddleware(http.HandlerFunc(handlers.HandleRecordRequest)))
 	http.Handle("/download", auth.JWTMiddleware(http.HandlerFunc(handlers.HandleDownloadRequest)))
+	http.Handle("/log", auth.JWTMiddleware(http.HandlerFunc(handlers.HandleLogRequest)))
 
 	log.Println("Starting server on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))

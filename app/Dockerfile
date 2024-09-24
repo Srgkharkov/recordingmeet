@@ -5,7 +5,7 @@ RUN apt-get update && apt-get -y upgrade && apt-get -y install gcc g++ ca-certif
 
 RUN mkdir -p /records
 
-RUN mkdir -p /log/screenshots
+# RUN mkdir -p /log/screenshots
 
 # Устанавливаем рабочую директорию
 WORKDIR /app

@@ -13,6 +13,7 @@
             "cwd": "${workspaceFolder}",  // Здесь можно указать конкретную директорию
             "env": {
                 "JWT_SECRET_KEY": "my_super_secret_key"
+                "NOTIFICATION_URL": "http://localhost:2000/notification"
             }
         }
     ]

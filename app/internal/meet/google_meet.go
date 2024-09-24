@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"path"
 	"strconv"
 	"time"
 
@@ -12,13 +11,19 @@ import (
 
 	cu "github.com/Davincible/chromedp-undetected"
 	"github.com/chromedp/cdproto/browser"
+
+	// "github.com/chromedp/cdproto/network"
+	"github.com/chromedp/cdproto/runtime"
 	"github.com/chromedp/chromedp"
 )
 
 // RecordGoogleMeet starts the recording process for Google Meet.
-func RecordGoogleMeet(ch chan string, ms *MeetService) {
-	log.Printf("Archive ID:%s\nConnecting Google Meet: %s\n", ms.ID, ms.Link)
-	ch <- fmt.Sprintf("Archive ID:%s", ms.ID)
+func RecordGoogleMeet(ch chan error, rec *Record) {
+	defer rec.CloseFile()
+	defer NotifyAfterExecution(rec)
+	// log.Printf("Archive ID:%s\nConnecting Google Meet: %s\n", rec.ID, rec.Link)
+	// ch <- fmt.Sprintf("Archive ID:%s", rec.ID)
+	rec.log.Printf("Archive ID:%s\nConnecting Google Meet: %s\n", rec.ID, rec.Link)
 	// New creates a new context for use with chromedp. With this context
 	// you can use chromedp as you normally would.
 	ctx, cancel, err := cu.New(cu.NewConfig(
@@ -51,26 +56,29 @@ func RecordGoogleMeet(ch chan string, ms *MeetService) {
 	// Переменная для хранения значения количества участников
 	var participantCount string
 
+	listenForNetworkEvent(ctx, rec)
+
 	if err := chromedp.Run(ctx,
 
 		browser.
 			SetDownloadBehavior(browser.SetDownloadBehaviorBehaviorAllow).
-			WithDownloadPath(path.Join(ms.ParentDirName, ms.ID)). //fmt.Sprintf("/home/sergei/recordingmeet/app/")).
+			WithDownloadPath(rec.DirName). //fmt.Sprintf("/home/sergei/recordingmeet/app/")).
 			WithEventsEnabled(true),
 
-		chromedp.Navigate(ms.Link),
+		chromedp.Navigate(rec.Link),
 
 		runWithTimeout(
 			ch,
 			"Waiting for body visibility",
 			10*time.Second,
 			chromedp.WaitVisible(`body`, chromedp.ByQuery),
+			rec,
 		),
 
 		tryClosePopup(
 			ctx,
 			buttonSelectorWOCamMic,
-			10*time.Second,
+			3*time.Second,
 		), // Ожидание видимости кнопки
 
 		chromedp.Sleep(100*time.Millisecond),
@@ -81,6 +89,7 @@ func RecordGoogleMeet(ch chan string, ms *MeetService) {
 			"Waiting for inputSelector visibility",
 			10*time.Second,
 			chromedp.WaitVisible(inputSelector),
+			rec,
 		), // Ожидание видимости поля ввода
 
 		chromedp.Sleep(100*time.Millisecond),
@@ -92,6 +101,7 @@ func RecordGoogleMeet(ch chan string, ms *MeetService) {
 			"Waiting for buttonSelectorJoin visibility",
 			10*time.Second,
 			chromedp.WaitEnabled(buttonSelectorJoin),
+			rec,
 		), // Ожидание, пока кнопка станет активной
 
 		chromedp.Sleep(100*time.Millisecond),
@@ -100,39 +110,50 @@ func RecordGoogleMeet(ch chan string, ms *MeetService) {
 		runWithTimeout(
 			ch,
 			"Waiting for buttonSelectorEnd visibility",
-			20*time.Second,
+			60*time.Second,
 			chromedp.WaitVisible(buttonSelectorEnd),
+			rec,
 		),
 
 		chromedp.ActionFunc(func(ctx context.Context) error {
-			ch <- fmt.Sprintf("Connection to the meeting was completed successfully.")
-			close(ch)
+			// ch <- fmt.Sprintf("Connection to the meeting was completed successfully.")
+			rec.log.Printf("Connection to the meeting was completed successfully.")
+			// ch <- nil
+			// close(ch)
 			// Ваш JavaScript код для запуска на странице
 			return chromedp.Evaluate(utils.Mediarecorderjs, nil).Do(ctx)
 		}),
-		chromedp.Sleep(10*time.Second),
+		chromedp.Sleep(1*time.Second),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			// ch <- fmt.Sprintf("Connection to the meeting was completed successfully.")
+			// rec.log.Printf("Connection to the meeting was completed successfully.")
+			ch <- nil
+			close(ch)
+			// Ваш JavaScript код для запуска на странице
+			return chromedp.Sleep(10 * time.Second).Do(ctx)
+		}),
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			for {
 				// Чтение значения количества участников
 				err := chromedp.Text(participantCountSelector, &participantCount, chromedp.NodeVisible).Do(ctx)
 				if err != nil {
-					log.Printf("Не удалось получить количество участников: %v", err)
+					rec.log.Printf("Не удалось получить количество участников: %v", err)
 					break
 				}
 
 				// Преобразование значения в целое число
 				count, err := strconv.Atoi(participantCount)
 				if err != nil {
-					log.Printf("Не удалось преобразовать количество участников в число: %v", err)
+					rec.log.Printf("Не удалось преобразовать количество участников в число: %v", err)
 					break
 				}
 
 				// Если участников меньше 2, кликаем по кнопке выхода
 				if count < 2 {
-					log.Println("Участников меньше 2, покидаем встречу.")
+					rec.log.Printf("Участников меньше 2, покидаем встречу.")
 					err := chromedp.Click(buttonSelectorEnd).Do(ctx)
 					if err != nil {
-						log.Printf("Не удалось кликнуть по кнопке выхода: %v", err)
+						rec.log.Printf("Не удалось кликнуть по кнопке выхода: %v", err)
 					}
 					break
 				}
@@ -144,9 +165,10 @@ func RecordGoogleMeet(ch chan string, ms *MeetService) {
 		}),
 		chromedp.Sleep(10*time.Second),
 	); err != nil {
-		ch <- fmt.Sprintf("Error in chromedp.Run: %s", err)
-		close(ch)
-		log.Printf("Error in chromedp.Run: %s", err)
+		// ch <- fmt.Sprintf("Error in chromedp.Run: %s", err)
+		rec.log.Printf("Error in chromedp.Run: %s", err)
+		// close(ch)
+		// log.Printf("Error in chromedp.Run: %s", err)
 		return
 	}
 
@@ -155,34 +177,35 @@ func RecordGoogleMeet(ch chan string, ms *MeetService) {
 }
 
 // Вспомогательная функция для создания контекста с таймаутом для набора действий
-func runWithTimeout(ch chan string, message string, timeout time.Duration, action chromedp.Action) chromedp.ActionFunc {
+func runWithTimeout(ch chan error, message string, timeout time.Duration, action chromedp.Action, rec *Record) chromedp.ActionFunc {
 	return func(ctx context.Context) error {
-		log.Printf("Starting action: %s", message)
+		rec.log.Printf("Starting action: %s", message)
 		// Создаём новый контекст с таймаутом для определённого набора действий
 		newctx, cancel := context.WithTimeout(ctx, timeout)
 		defer cancel()
 
 		err := action.Do(newctx)
 		if err != nil {
-			ch <- fmt.Sprintf("Error during action: %s, error: %v\n", message, err)
-			log.Printf("Error during action: %s, error: %v\n", message, err)
+			ch <- fmt.Errorf("Error during action: %s, error: %v\n", message, err)
+			close(ch)
+			rec.log.Printf("Error during action: %s, error: %v\n", message, err)
 
 			var screenshotBuffer []byte
 			chromedp.CaptureScreenshot(&screenshotBuffer).Do(ctx)
 			filename := fmt.Sprintf("%d", time.Now().Unix())
-			err := utils.SaveScreenshoot(&screenshotBuffer, fmt.Sprintf("./log/screenshots/%s.png", filename))
+			err := utils.SaveScreenshoot(&screenshotBuffer, fmt.Sprintf("%s/%s.png", rec.DirName, filename))
 			if err != nil {
-				log.Printf("Can`t save screenshot\n")
+				rec.log.Printf("Can`t save screenshot\n")
 			} else {
-				log.Printf("Saved screenshot:%s\n", filename)
+				rec.log.Printf("Saved screenshot:%s\n", filename)
 			}
 
 			var htmlContent string
 			chromedp.OuterHTML("html", &htmlContent).Do(ctx)
 			// domsnapshot.CaptureSnapshot(htmlSnapshot)
-			err = utils.SavePage(&htmlContent, fmt.Sprintf("./log/screenshots/%s.html", filename))
+			err = utils.SavePage(&htmlContent, fmt.Sprintf("%s/%s.html", rec.DirName, filename))
 		} else {
-			log.Printf("Successfully finished action: %s\n", message)
+			rec.log.Printf("Successfully finished action: %s\n", message)
 		}
 		return err
 	}
@@ -216,4 +239,25 @@ func tryClosePopup(ctx context.Context, selector string, timeout time.Duration) 
 
 		return nil
 	}
+}
+
+func listenForNetworkEvent(ctx context.Context, rec *Record) {
+	chromedp.ListenTarget(ctx, func(ev interface{}) {
+		switch ev := ev.(type) {
+		case *runtime.EventConsoleAPICalled:
+			rec.log.Printf("* console.%s call:\n", ev.Type)
+			for _, arg := range ev.Args {
+				rec.log.Printf("%s - %s\n", arg.Type, arg.Value)
+				if fmt.Sprintf("%s", arg.Value) == "\"Recording started for track\"" {
+					rec.StreamCount++
+				}
+			}
+			// case *network.EventResponseReceived:
+			//     resp := ev.Response
+			//     if len(resp.Headers) != 0 {
+			//         log.Printf("received headers: %s", resp.Headers)
+			//     }
+		}
+		// other needed network Event
+	})
 }

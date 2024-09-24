@@ -46,7 +46,7 @@ function startRecordingTrack(track, index) {
 
     mediaRecorder.start();
     activeMediaRecorders[track.id] = mediaRecorder;
-    console.log('Recording started for track ', track.id);
+    console.log('Recording started for track', track.id);
 }
 
 // Функция для сохранения таймлайна в JSON файл
