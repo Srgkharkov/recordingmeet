@@ -84,73 +84,26 @@ docker run -p 8080:8080 --env-file .env recordingmeet
 git clone https://github.com/Srgkharkov/recordingmeet.git
 ```
 
-2. Замените домен в конфигурационных файлах:
+2. Создайте файл с переменными окружения:
 
 ```bash
-//Makefile
-# Makefile для управления Docker Compose
-
-# Переменные
-COMPOSE_FILE := docker-compose.yml
-
-# Правила
-.PHONY: up down restart
-
-# Запуск контейнеров в фоне
-up:
-	docker-compose -f $(COMPOSE_FILE) up -d
-
-# Остановка и удаление контейнеров
-down:
-	docker-compose -f $(COMPOSE_FILE) down
-
-# Перезапуск контейнеров
-restart: down up
-
-# Запуск приложения
-runmaingo:
-	cd app &&	go run main.go
-
-# Первичное получение сертификатов
- onlycertbot:
- 	docker run -it --rm  \
--v /root/recordingmeet/nginx/certs:/etc/letsencrypt  \
--v /root/recordingmeet/nginx:/var/lib/letsencrypt  \
--p 80:80  certbot/certbot certonly \
---standalone \
--d `example.com`
+cd recordingmeet
+echo "JWT_SECRET_KEY=your_secret_key" > .env
+echo "NOTIFICATION_URL=https://example.com/notification" >> .env
 ```
+
+3. Замените домен в конфигурационных файлах:
+
 ```bash
-//nginx.conf
-server {
-    listen 80;
-    server_name `example.com`;
-    return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    server_name `example.com`;
-
-    ssl_certificate /etc/nginx/certs/live/`example.com`/fullchain.pem;
-    ssl_certificate_key /etc/nginx/certs/live/`example.com`/privkey.pem;
-
-    location / {
-        proxy_pass http://go-app:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-
+sed -i 's/example\.com/newexample.com/g' Makefile
+sed -i 's/example\.com/newexample.com/g' nginx/nginx.conf
 ```
  
-3. Выполните получение сертификатов.
+4. Выполните получение сертификатов.
 ```bash
 make onlycertbot
 ```   
-4. Запустите приложение.
+5. Запустите приложение.
 ```bash
 make up
 ```   
