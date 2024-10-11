@@ -238,9 +238,9 @@ func RecordGoogleMeet(rec *Record) error {
 
 	// Добавляем каждый аудиотрек с учетом задержки
 	for _, track := range tracks {
-		log.Printf("layout %s, StartTimeStr %s", videoStartTime.UnixMilli(), track.StartTime.UnixMilli())
+		// log.Printf("layout %s, StartTimeStr %s", videoStartTime.UnixMilli(), track.StartTime.UnixMilli())
 		offset := utils.CalculateOffset(videoStartTime, track.StartTime)
-		log.Printf("layout %s, StartTimeStr %s, StartTime %lf", videoStartTime.UnixMilli(), track.StartTime.UnixMilli(), offset)
+		// log.Printf("layout %s, StartTimeStr %s, StartTime %lf", videoStartTime.UnixMilli(), track.StartTime.UnixMilli(), offset)
 		// Если есть задержка, добавляем её через itsoffset
 		if offset > 0 {
 			args = append(args, "-itsoffset", fmt.Sprintf("%.3f", offset))

@@ -28,7 +28,7 @@ services:
     restart: always
     privileged: true
     environment:
-      - RECORDS_DIR: "${PWD}/records"
+      RECORDS_DIR: "${PWD}/records"
 
   nginx:
     image: nginx:latest

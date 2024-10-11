@@ -22,7 +22,7 @@ func RunRecorder(recorderID string, containerName string) error {
 	// Параметры конфигурации контейнера
 	config := &container.Config{
 		Image: "go-recorder", // Убедись, что образ уже существует (собран и доступен)
-		Env:   []string{fmt.Sprintf("RECORDER_ID=%s", recorderID)},
+		Env:   []string{fmt.Sprintf("RECORDER_ID=%s", recorderID), fmt.Sprintf("NOTIFICATION_URL=%s", os.Getenv("NOTIFICATION_URL"))},
 	}
 
 	// recordsDirName, err := GetRecordsDir()
