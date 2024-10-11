@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	// "github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -31,9 +32,9 @@ func RunRecorder(recorderID string, containerName string) error {
 	// }
 
 	hostConfig := &container.HostConfig{
-		AutoRemove: true,
-		// Binds: []string{"./records:/records"}, // Пример монтирования томов
-		Binds: []string{"/home/sergei/recordingmeet/records:/records"}, // Пример монтирования томов
+		// AutoRemove: true,
+		Binds: []string{fmt.Sprintf("%s:/records", os.Getenv("RECORDS_DIR"))}, // Пример монтирования томов
+		// Binds: []string{"/home/sergei/recordingmeet/records:/records"}, // Пример монтирования томов
 	}
 	log.Println(hostConfig.Binds)
 

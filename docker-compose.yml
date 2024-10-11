@@ -4,12 +4,12 @@ services:
       context: ./app
       dockerfile: Dockerfile.recorder
     image: go-recorder:latest
-    env_file:
-      - ".env"
-    volumes:
-      - ./records:/records
-    profiles:
-      - manual # Обозначаем, что этот сервис не будет запускаться по умолчанию
+    # env_file:
+    #   - ".env"
+    # volumes:
+      # - ./records:/records
+    # profiles:
+    #   - no-run # Обозначаем, что этот сервис не будет запускаться по умолчанию
 
   go-server:
     build:
@@ -27,6 +27,8 @@ services:
       - ./records:/records
     restart: always
     privileged: true
+    environment:
+      - RECORDS_DIR: "${PWD}/records"
 
   nginx:
     image: nginx:latest

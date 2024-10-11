@@ -16,4 +16,4 @@ app/build/
 nginx/certs/
 
 # Ignore records
-records/
+records/*
