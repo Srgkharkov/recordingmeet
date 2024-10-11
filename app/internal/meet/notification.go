@@ -36,7 +36,7 @@ func NotifyAfterExecution(record *Record) error {
 
 	// Проверяем успешность запроса
 	if resp.StatusCode != http.StatusOK {
-		log.Printf("не удалось отправить уведомление, код ответа: %d", resp.StatusCode)
+		log.Printf("не удалось отправить уведомление по адресу %s, код ответа: %d", notificationURL, resp.StatusCode)
 		return fmt.Errorf("не удалось отправить уведомление, код ответа: %d", resp.StatusCode)
 	}
 

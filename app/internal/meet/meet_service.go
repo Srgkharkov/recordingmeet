@@ -1,11 +1,13 @@
 package meet
 
 import (
+	"encoding/json"
 	"fmt"
-	// "log"
+	"log"
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -87,6 +89,31 @@ func NewRecordByLink(link string, time int64) (*Record, error) {
 	// record.file, err = os.Create(path.Join(record.DirName, "recorder.log"))
 	// record.log = log.New(record.file, "INFO\t", log.Ldate|log.Ltime)
 
+	return &record, nil
+}
+
+func ReadFromFile(path string) (*Record, error) {
+	// Открываем файл
+	file, err := os.Open(path)
+	if err != nil {
+		log.Fatalf("Ошибка открытия файла:", err)
+		return nil, err
+	}
+	defer file.Close()
+
+	var record Record
+
+	// Декодируем JSON из файла в структуру
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&record)
+	if err != nil {
+		log.Fatalf("Ошибка при декодировании JSON:", err)
+		return nil, err
+	}
+
+	log.Println("Decoding JSON complete.")
+
+	record.DirName = filepath.Base(filepath.Dir(path))
 	return &record, nil
 }
 

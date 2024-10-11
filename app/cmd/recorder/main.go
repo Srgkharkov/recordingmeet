@@ -37,27 +37,32 @@ func main() {
 	// Перенаправляем стандартный логгер на запись в файл
 	log.SetOutput(filelog)
 
-	// Открываем файл
-	file, err := os.Open(filepath.Join(recordsDirName, "record.json"))
+	record, err := meet.ReadFromFile(filepath.Join(recordsDirName, "record.json"))
 	if err != nil {
-		log.Fatalf("Ошибка открытия файла:", err)
-		return
-	}
-	defer file.Close()
-
-	var record meet.Record
-
-	// Декодируем JSON из файла в структуру
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&record)
-	if err != nil {
-		log.Fatalf("Ошибка при декодировании JSON:", err)
-		return
+		log.Fatalf("Ошибка при чтении файла record.json: %v", err)
 	}
 
-	log.Println("Decoding JSON complete.")
+	// // Открываем файл
+	// file, err := os.Open(filepath.Join(recordsDirName, "record.json"))
+	// if err != nil {
+	// 	log.Fatalf("Ошибка открытия файла:", err)
+	// 	return
+	// }
+	// defer file.Close()
 
-	record.DirName = recordsDirName
+	// var record meet.Record
+
+	// // Декодируем JSON из файла в структуру
+	// decoder := json.NewDecoder(file)
+	// err = decoder.Decode(&record)
+	// if err != nil {
+	// 	log.Fatalf("Ошибка при декодировании JSON:", err)
+	// 	return
+	// }
+
+	// log.Println("Decoding JSON complete.")
+
+	// record.DirName = recordsDirName
 
 	// record.SetLogger(log.Default())
 
@@ -85,7 +90,7 @@ func main() {
 		}
 
 		// Запись обновлённого JSON в файл
-		err = os.WriteFile(filepath.Join(recordsDirName, "formatted_output.json"), recordJSON, 0644)
+		err = os.WriteFile(filepath.Join(recordsDirName, "record.json"), recordJSON, 0644)
 		if err != nil {
 			log.Fatalf("Ошибка при записи JSON в файл: %v", err)
 		}
@@ -99,12 +104,12 @@ func main() {
 		}
 
 		// Запись обновлённого JSON в файл
-		err = os.WriteFile(filepath.Join(recordsDirName, "formatted_output.json"), recordJSON, 0644)
+		err = os.WriteFile(filepath.Join(recordsDirName, "record.json"), recordJSON, 0644)
 		if err != nil {
 			log.Fatalf("Ошибка при записи JSON в файл: %v", err)
 		}
 
-		meet.RecordGoogleMeet(&record)
+		meet.RecordGoogleMeet(record)
 
 		// file, err := os.Create(filepath.Join(record.DirName, "record.json"))
 		// if err != nil {

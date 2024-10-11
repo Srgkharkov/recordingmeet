@@ -36,10 +36,10 @@ func CreateFromFile(path string) ([]AudioTrack, error) {
 		return nil, err
 	}
 
-	for i, track := range tracks {
+	for i := range tracks {
 		layout := "2006-01-02T15:04:05.000Z"
 		tracks[i].StartTime, err = time.Parse(layout, tracks[i].StartTimeStr)
-		log.Printf("layout %s, StartTimeStr %s, StartTime %f", layout, track.StartTimeStr, track.StartTime.UnixMilli())
+		// log.Printf("layout %s, StartTimeStr %s, StartTime %f", layout, track.StartTimeStr, track.StartTime.UnixMilli())
 		if err != nil {
 			log.Printf("Error parsing start time: %v", err)
 		}
