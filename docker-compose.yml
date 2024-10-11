@@ -1,15 +1,30 @@
 version: '3'
 
 services:
-  go-app:
+  go-recorder:
     build:
-      context: ./app
+      context: ./app/Dockerfile.recorder
+    env_file:
+      - ".env"
+    volumes:
+      - ./records:/records
+    profiles:
+      - manual # Обозначаем, что этот сервис не будет запускаться по умолчанию
+
+  go-server:
+    build:
+      context: ./app/Dockerfile.server
     networks:
       - mynetwork
     env_file:
       - ".env"
     expose:
       - "8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./records:/records
+    restart: always
+    privileged: true
 
   nginx:
     image: nginx:latest
@@ -23,7 +38,7 @@ services:
     networks:
       - mynetwork
     depends_on:
-      - go-app
+      - go-server
     restart: always
 
   certbot:

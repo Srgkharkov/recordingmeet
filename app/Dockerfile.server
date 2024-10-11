@@ -1,9 +1,9 @@
 # Используем официальный образ golang для сборки
 FROM golang:1.23 AS builder
 
-RUN apt-get update && apt-get -y upgrade && apt-get -y install gcc g++ ca-certificates chromium xvfb
+# RUN apt-get update && apt-get -y upgrade && apt-get -y install gcc g++ ca-certificates chromium xvfb ffmpeg
 
-RUN mkdir -p /records
+# RUN mkdir -p /records
 
 # RUN mkdir -p /log/screenshots
 
@@ -19,7 +19,7 @@ COPY . .
 RUN go mod download
 
 # Собираем приложение
-RUN go build -o build/rec ./cmd/server
+RUN go build -o build/server ./cmd/server
 
 WORKDIR /
 
@@ -28,4 +28,4 @@ WORKDIR /
 # RUN go build -o build/main .
 # CGO_ENABLED=0 GOOS=linux
 
-ENTRYPOINT [ "/app/build/rec" ]
+ENTRYPOINT [ "/app/build/server" ]

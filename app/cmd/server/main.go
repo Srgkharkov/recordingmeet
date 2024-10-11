@@ -17,6 +17,7 @@ func main() {
 	}
 
 	http.Handle("/record", auth.JWTMiddleware(http.HandlerFunc(handlers.HandleRecordRequest)))
+	http.Handle("/list", auth.JWTMiddleware(http.HandlerFunc(handlers.HandleListRequest)))
 	// http.Handle("/download", auth.JWTMiddleware(http.HandlerFunc(handlers.HandleDownloadRequest)))
 	http.HandleFunc("/download", handlers.HandleDownloadRequest)
 	// http.Handle("/log", auth.JWTMiddleware(http.HandlerFunc(handlers.HandleLogRequest)))

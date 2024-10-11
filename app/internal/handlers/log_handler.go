@@ -26,19 +26,21 @@ func HandleLogRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Проверяем, существует ли директория
-	info, err := os.Stat(filepath.Join(recordsDirName, dir))
-	if os.IsNotExist(err) {
-		http.Error(w, "Директория архива не существует, возможно неверно указан идентификатор архива", http.StatusNotFound)
-		return
-	}
-	if !info.IsDir() {
-		http.Error(w, "Указанный путь не является директорией", http.StatusBadRequest)
-		return
-	}
+	filePath := filepath.Join(recordsDirName, dir, "record.log")
+
+	// // Проверяем, существует ли директория
+	// info, err := os.Stat(filepath.Join(recordsDirName, dir))
+	// if os.IsNotExist(err) {
+	// 	http.Error(w, "Директория архива не существует, возможно неверно указан идентификатор архива", http.StatusNotFound)
+	// 	return
+	// }
+	// if !info.IsDir() {
+	// 	http.Error(w, "Указанный путь не является директорией", http.StatusBadRequest)
+	// 	return
+	// }
 
 	// Открываем файл log.log
-	file, err := os.Open(filepath.Join(recordsDirName, dir, "log.log"))
+	file, err := os.Open(filePath)
 	if err != nil {
 		http.Error(w, "Не удалось открыть лог файл", http.StatusInternalServerError)
 		log.Printf("Ошибка открытия файла: %v", err)

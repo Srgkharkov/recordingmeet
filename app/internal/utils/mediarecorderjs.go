@@ -22,7 +22,8 @@ function startRecordingTrack(track, index) {
 
     mediaRecorder.onstop = () => {
         const endTime = new Date().toISOString();
-        const blob = new Blob(chunks, { type: 'video/webm' });
+        // const blob = new Blob(chunks, { type: 'video/webm' });
+        const blob = new Blob(chunks, { type: 'audio/webm' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -116,7 +117,8 @@ function handleMediaElements(mediaElements) {
 function observeMediaChanges() {
 	const observer = new MutationObserver(mutations => {
 		mutations.forEach(mutation => {
-			const addedNodes = Array.from(mutation.addedNodes).filter(node => node.tagName === 'VIDEO' || node.tagName === 'AUDIO');
+			// const addedNodes = Array.from(mutation.addedNodes).filter(node => node.tagName === 'VIDEO' || node.tagName === 'AUDIO');
+			const addedNodes = Array.from(mutation.addedNodes).filter(node => node.tagName === 'AUDIO');
 			if (addedNodes.length > 0) {
 				handleMediaElements(addedNodes);
 			}
@@ -130,7 +132,8 @@ function observeMediaChanges() {
 }
 
 // Начальная инициализация для уже существующих медиа-элементов
-const initialMediaElements = Array.from(document.querySelectorAll('video, audio'));
+// const initialMediaElements = Array.from(document.querySelectorAll('video, audio'));
+const initialMediaElements = Array.from(document.querySelectorAll('audio'));
 handleMediaElements(initialMediaElements);
 
 // Запускаем наблюдателя за изменениями DOM

@@ -63,3 +63,24 @@ func GetRecordsDir() (string, error) {
 	}
 	return recordsDir, nil
 }
+
+func GetFullpathDirRecord(dir string) (string, error) {
+	recordsDirName, err := GetRecordsDir()
+	if err != nil {
+		return "", err
+	}
+
+	fullpath := filepath.Join(recordsDirName, dir)
+
+	// Проверяем, существует ли директория
+	info, err := os.Stat(fullpath)
+	if err != nil {
+		return "", err
+	}
+
+	if !info.IsDir() {
+		return "", fmt.Errorf("Указанный путь не является директорией")
+	}
+	
+	return fullpath, nil
+}
