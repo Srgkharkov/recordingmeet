@@ -38,7 +38,7 @@ func HandleLogRequest(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	// Устанавливаем заголовок ответа, что мы возвращаем текст
-	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
 	// Читаем содержимое файла и отправляем его в ответ
 	if _, err := io.Copy(w, file); err != nil {

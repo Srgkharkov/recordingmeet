@@ -113,7 +113,7 @@ func ReadFromFile(path string) (*Record, error) {
 
 	log.Println("Decoding JSON complete.")
 
-	record.DirName = filepath.Base(filepath.Dir(path))
+	record.DirName = filepath.Dir(path)
 	return &record, nil
 }
 
