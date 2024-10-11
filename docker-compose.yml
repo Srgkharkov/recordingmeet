@@ -1,9 +1,9 @@
-version: '3'
-
 services:
   go-recorder:
     build:
-      context: ./app/Dockerfile.recorder
+      context: ./app
+      dockerfile: Dockerfile.recorder
+    image: go-recorder:latest
     env_file:
       - ".env"
     volumes:
@@ -13,7 +13,9 @@ services:
 
   go-server:
     build:
-      context: ./app/Dockerfile.server
+      context: ./app
+      dockerfile: Dockerfile.server
+    image: go-server:latest
     networks:
       - mynetwork
     env_file:
