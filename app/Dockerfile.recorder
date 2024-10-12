@@ -1,30 +1,15 @@
 # Используем официальный образ golang для сборки
 FROM golang:1.23 AS builder
 
-# RUN apt-get update && apt-get -y upgrade && apt-get -y install gcc g++ ca-certificates chromium xvfb ffmpeg alsa-utils x11-apps pulseaudio pulseaudio-utils dbus-x11 libasound2 mc
 # Устанавливаем необходимые пакеты
 RUN apt-get update && apt-get install -y \
     chromium \
     xvfb \
     ffmpeg \
-    pipewire \
-    pipewire-pulse \
-    pipewire-audio-client-libraries \
-    alsa-utils \
-    pulseaudio-utils \
-    dbus \
-    mc \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-# RUN mkdir -p /records
-
-# RUN mkdir -p /log/screenshots
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
-
-# # Копируем go.mod и go.sum для установки зависимостей
-# COPY go.mod go.sum ./
-# RUN go mod download
 
 # Копируем исходный код приложения
 COPY . .
@@ -35,16 +20,8 @@ RUN go build -o build/recorder ./cmd/recorder
 
 WORKDIR /
 
-
-# Сборка Go-приложения
-# RUN go build -o build/main .
-# CGO_ENABLED=0 GOOS=linux
-
-# ENTRYPOINT [ "/app/build/recorder" ]
-
 # Настраиваем окружение для Xvfb
 ENV DISPLAY=:99
-# ENV PULSE_SERVER=unix:/run/pulse/native
 
 # Запускаем Xvfb перед основным приложением
 ENTRYPOINT [ "sh", "-c", "Xvfb :99 -screen 0 1920x1080x24 & /app/build/recorder" ]
