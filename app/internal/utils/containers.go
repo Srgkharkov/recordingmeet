@@ -32,11 +32,10 @@ func RunRecorder(recorderID string, containerName string) error {
 	// }
 
 	hostConfig := &container.HostConfig{
-		// AutoRemove: true,
-		Binds: []string{fmt.Sprintf("%s:/records", os.Getenv("RECORDS_DIR"))}, // Пример монтирования томов
-		// Binds: []string{"/home/sergei/recordingmeet/records:/records"}, // Пример монтирования томов
+		AutoRemove: true,
+		Binds:      []string{fmt.Sprintf("%s:/records", os.Getenv("RECORDS_DIR"))}, // Пример монтирования томов
 	}
-	log.Println(hostConfig.Binds)
+	// log.Println(hostConfig.Binds)
 
 	// Создание контейнера
 	resp, err := cli.ContainerCreate(context.Background(), config, hostConfig, nil, nil, containerName)
