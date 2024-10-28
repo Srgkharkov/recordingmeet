@@ -296,6 +296,8 @@ func RecordGoogleMeet(rec *Record) error {
 
 	// cmd = exec.Command("ffmpeg")
 
+	rec.Status = "RECORDED"
+
 	return nil
 
 }

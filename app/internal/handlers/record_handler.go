@@ -31,7 +31,13 @@ func HandleRecordRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	record, err := meet.NewRecordByLink(link, time.Now().UnixMilli())
+	userID := r.URL.Query().Get("user_id")
+	if link == "" {
+		http.Error(w, "user_id parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	record, err := meet.NewRecordByLink(link, userID, time.Now().UnixMilli())
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Error parsing link: %v", err)

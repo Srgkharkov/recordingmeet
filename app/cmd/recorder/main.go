@@ -111,7 +111,7 @@ func main() {
 
 		meet.RecordGoogleMeet(record)
 
-		record.Status = "RECORDED"
+		// record.Status = "RECORDED"
 
 		// Запись обновлённого JSON в файл
 		err = os.WriteFile(filepath.Join(recordsDirName, "record.json"), recordJSON, 0644)

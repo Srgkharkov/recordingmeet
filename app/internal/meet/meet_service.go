@@ -21,6 +21,7 @@ type Record struct {
 	LinkDownloadMP3 string `json:"linkdownloadmp3,omitempty"`
 	LinkLog         string `json:"linklog,omitempty"`
 	StreamCount     int    `json:"streamcount,omitempty"`
+	UserID          string `json:"user_id,omitempty"`
 	// LogPath		 string `json:"logpath,omitempty"`
 	DirName string
 	// log          *log.Logger
@@ -40,7 +41,7 @@ type Record struct {
 // }
 
 // NewRecordByLink parses the link and creates a directory for recordings.
-func NewRecordByLink(link string, time int64) (*Record, error) {
+func NewRecordByLink(link string, userID string, time int64) (*Record, error) {
 	parsedURL, err := url.Parse(link)
 	if err != nil {
 		return nil, err
@@ -63,6 +64,7 @@ func NewRecordByLink(link string, time int64) (*Record, error) {
 			Service: "GM",
 			ID:      fmt.Sprintf("%s_%s_%d", "GM", meetID, time),
 			Link:    link,
+			UserID:  userID,
 		}
 
 		// path.Split(pathURL)
